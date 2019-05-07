@@ -104,7 +104,6 @@ x-tagGroups:
   - name: Endpoints
     tags:
       - auth
-      - channels
       - messages
       - files
 schemes:
