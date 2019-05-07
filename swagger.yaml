@@ -1,0 +1,761 @@
+swagger: '2.0'
+info:
+  description: |
+    ### Конструктор приложений
+  version: 0.0.3
+  title: ''
+  termsOfService: ''
+  contact:
+    email: ''
+  x-logo:
+    url: ""
+    backgroundColor: "#FFFFFF"
+basePath: /api/v1
+host: demo.com
+tags:
+  - name: errors
+    description: |
+      пример типовой ошибки:
+      ```
+      {
+          "id": "the.error.id",
+          "message": "no connect oauth provider", // причина
+          "request_id": "", // ID запроса
+          "status_code": 0 // HTTP status code
+
+      }
+  - name: websocket
+    description: |
+      #### События
+
+      События WebSocket в основном используются для уведомления клиента об изменениях, таких как доставка новых сообщений или уведомления собеседнику о вводе текста.
+
+      ```
+      {
+        "event": "hello",
+        "data": {
+          "server_version": "3.6.0.1451.1c38da627ebb4e3635677db6939e9195"
+        },
+        "broadcast":{
+          "omit_users": null,
+          "user_id": "ay5sq51sebfh58ktrce5ijtcwy",
+          "channel_id": "",
+
+        }
+      }
+      ```
+
+      Поле `event` указывает тип события,` data` содержит любые данные, относящиеся к событию, а `broadcast` содержит информацию о том, кому было отправлено событие. Например, приведенный выше пример имеет `user_id`, установленный в" ay5sq51sebfh58ktrce5ijtcwy ", что означает, что только пользователь с этим идентификатором получил это событие. Поле `omit_users` может содержать массив идентификаторов пользователей, которые были исключены при получении события.
+      Список событий:
+      - typing
+      - posted
+      - hello
+
+
+      #### WebSocket API
+
+      ```
+      {
+        "action": "user_typing",
+        "seq": 2,
+        "data": {
+          "channel_id": "nhze199c4j87ped4wannrjdt9c",
+        }
+      }
+      ```
+
+      Это пример запроса `user_typing`, оповещает сервер о том, что подключенный клиент начал печатать в беседе. Поле `action` указывает, что запрашивается, и выполняет аналогичную функцию, как роут в HTTP API.
+      «seq» или порядковый номер задается клиентом и при каждом использовании должны быть увеличены. Он используется для различения ответов на запросы, поступающие с WebSocket. Например, стандартный ответ на вышеуказанный запрос:
+      ```
+      {
+        "status": "OK",
+        "seq_reply": 2
+      }
+      ```
+
+      Уведомление `seq_reply` равно 2, соответствуя` seq` исходного запроса. Используя это, клиент может различать, к какому запросу относится ответ.
+
+
+      В случае ошибки ответ будет следующим:
+
+      ```
+      {
+        "status": "FAIL",
+        "seq_reply": 2,
+        "error": {
+          "id": "some.error.id.here",
+          "message": "Some error message here"
+        }
+      }
+      ```
+  - name: auth
+    description: Авторизация.
+  - name: channels
+    description: Беседы.
+  - name: messages
+    description: Сообщения
+  - name: files
+    description: Работа с файлами.
+x-tagGroups:
+  - name: Базовые определения
+    tags:
+      - errors
+      - websocket
+  - name: Endpoints
+    tags:
+      - auth
+      - channels
+      - messages
+      - files
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+responses:
+  'Forbidden':
+    description: Do not have appropriate permissions
+    schema:
+      $ref: '#/definitions/AppError'
+  'Unauthorized':
+    description: No access token provided
+    schema:
+      $ref: '#/definitions/AppError'
+  'BadRequest':
+    description: Invalid or missing parameters in URL or request body
+    schema:
+      $ref: '#/definitions/AppError'
+  'NotFound':
+    description: Resource not found
+    schema:
+      $ref: '#/definitions/AppError'
+  'TooLarge':
+    description: Content too large
+    schema:
+      $ref: '#/definitions/AppError'
+  'NotImplemented':
+    description: Feature is disabled
+    schema:
+      $ref: '#/definitions/AppError'
+  'InternalServerError':
+    description: Something went wrong with the server
+    schema:
+      $ref: '#/definitions/AppError'
+paths:
+  '/users/reg':
+    post:
+      tags:
+        - auth
+      summary:
+      description: Регистрация пользователя по номеру телефона
+      parameters:
+        - name: nickname
+          in: path
+          description: Имя пользователя для отображения
+          required: true
+          type: string
+        - name: phone
+          in: path
+          description: Телефон, формат (7XXXXXXXXX)
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/RegToken'
+        '400':
+            $ref: '#/responses/BadRequest'
+        '401':
+            $ref: '#/responses/Unauthorized'
+        '403':
+            $ref: '#/responses/Forbidden'
+        '404':
+            $ref: '#/responses/NotFound'
+  '/users/send':
+    post:
+      tags:
+        - auth
+      summary:
+      description: Отправка СМС сообщения с кодом доступа
+      parameters:
+        - name: token
+          in: path
+          description: Токен досутпа
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/StatusOK'
+        '400':
+            $ref: '#/responses/BadRequest'
+        '401':
+            $ref: '#/responses/Unauthorized'
+        '403':
+            $ref: '#/responses/Forbidden'
+        '404':
+            $ref: '#/responses/NotFound'
+  '/users/verify':
+    post:
+      tags:
+        - auth
+      summary:
+      description: Подтверждения регистрации
+      parameters:
+      - name: token
+        in: path
+        description: Токен досутпа
+        required: true
+        type: string
+      - name: code
+        in: path
+        description: Код подверждения
+        required: true
+        type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/UserReg'
+        '400':
+            $ref: '#/responses/BadRequest'
+        '401':
+            $ref: '#/responses/Unauthorized'
+        '403':
+            $ref: '#/responses/Forbidden'
+        '404':
+            $ref: '#/responses/NotFound'
+  '/tokens/{token}':
+    get:
+      tags:
+        - auth
+      summary:
+      description: Получить информации по токену доступа
+      parameters:
+        - name: token
+          in: path
+          description: Токена
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/GetToken'
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+  '/attach_device':
+    post:
+      tags:
+        - auth
+      summary:
+      description: Привязка токена устройства
+      parameters:
+        - name: device_id
+          in: path
+          description: Токен устройства
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/StatusOK'
+        '400':
+            $ref: '#/responses/BadRequest'
+        '401':
+            $ref: '#/responses/Unauthorized'
+        '403':
+            $ref: '#/responses/Forbidden'
+        '404':
+            $ref: '#/responses/NotFound'
+
+  '/messages':
+      get:
+            tags:
+              - messages
+            summary: Возвращает список сообщений
+            description: |
+              Возвращет список сообщений. Параметры `since`, `before` и `after` нельзя использовать совместно.
+            parameters:
+
+              - name: page
+                in: query
+                description: Порядковый номер страницы
+                default: "0"
+                type: string
+              - name: per_page
+                in: query
+                description: Количество записей на странице
+                default: "60"
+                type: string
+              - name: since
+                in: query
+                description: Ненулевое значение в миллисекундах (unix), чтобы выбрать сообщения, созданные после этого времени
+                type: integer
+              - name: before
+                in: query
+                description: Идентификатор сообщения для выбора сообщений, которые были до него
+                type: string
+              - name: after
+                in: query
+                description: Идентификатор сообщения для выбора сообщений, которые были после
+                type: string
+            responses:
+              '200':
+                description: Список сообщений
+                schema:
+                  $ref: "#/definitions/MessageList"
+              '400':
+                $ref: '#/responses/BadRequest'
+              '401':
+                $ref: '#/responses/Unauthorized'
+              '403':
+                $ref: '#/responses/Forbidden'
+      post:
+          tags:
+            - messages
+          summary: Создание сообщения
+          description: ''
+
+          parameters:
+            - in: body
+              name: post
+              description: json
+              required: true
+              schema:
+                type: object
+                required:
+
+                  - message
+                properties:
+
+                  message:
+                    type: string
+                    description: Текст сообщения, поддерживает markdown
+                  local_id:
+                    type: string
+                    description: Дополнительный идентификатор для мобильного клиента
+                  file_ids:
+                    type: array
+                    description: Массив идентификаторов прикрепленных файлов
+                    items:
+                      type: string
+
+          responses:
+            '201':
+              description: Успешное создание сообщения
+              schema:
+                $ref: '#/definitions/Message'
+            '400':
+              $ref: '#/responses/BadRequest'
+            '401':
+              $ref: '#/responses/Unauthorized'
+            '403':
+              $ref: '#/responses/Forbidden'
+  '/messages/{message_id}':
+      get:
+        tags:
+          - messages
+        summary: Получить сообщение
+        description: |
+          Получить одно сообщение
+        parameters:
+          - name: message_id
+            in: path
+            description: Идентификатор сообщения
+            required: true
+            type: string
+        responses:
+          '200':
+            description: Возвращает сообщение
+            schema:
+              $ref: "#/definitions/Message"
+          '400':
+            $ref: '#/responses/BadRequest'
+          '401':
+            $ref: '#/responses/Unauthorized'
+          '403':
+            $ref: '#/responses/Forbidden'
+
+  /files:
+    post:
+      tags:
+        - files
+      summary: Загрузка файла
+      description: |
+
+      consumes: ["multipart/form-data"]
+      parameters:
+        - name: files
+          in: formData
+          description: Данные файлов
+          required: true
+          type: file
+        - name: channel_id
+          in: formData
+          description: Ид канала
+          required: true
+          type: string
+        - name: local_ids
+          in: formData
+          description: Локальный идентифкатор файлов
+          required: false
+          allowEmptyValue: true
+          type: string
+      responses:
+        '200':
+          description: Возврашает сопостовление локального идентификатора и ид в базе данных
+          schema:
+            type: object
+            properties:
+              file_infos:
+                description:
+                type: array
+                items:
+                  $ref: '#/definitions/FileInfo'
+              local_ids:
+                description:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '413':
+          $ref: '#/responses/TooLarge'
+        '501':
+          $ref: '#/responses/NotImplemented'
+  '/files/{file_id}':
+    get:
+      tags:
+        - files
+      summary: Получить файл
+      description: |
+      parameters:
+        - name: file_id
+          in: path
+          description: Идентификатор файла (local_id, id)
+          required: true
+          type: string
+      responses:
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '501':
+          $ref: '#/responses/NotImplemented'
+  '/files/{file_id}/thumbnail':
+    get:
+      tags:
+        - files
+      summary: Картинка предпросмотра
+      description: |
+      parameters:
+        - name: file_id
+          in: path
+          description: Идентификатор файла (local_id, id)
+          required: true
+          type: string
+      responses:
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '501':
+          $ref: '#/responses/NotImplemented'
+  '/files/{file_id}/info':
+    get:
+      tags:
+        - files
+      summary: Метаданные файла
+      description: |
+
+      parameters:
+        - name: file_id
+          in: path
+          description: Идентификатор файла (local_id, id)
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Метаданные
+          schema:
+            $ref: "#/definitions/FileInfo"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '404':
+          $ref: '#/responses/NotFound'
+        '501':
+          $ref: '#/responses/NotImplemented'
+
+definitions:
+  Channel:
+    type: object
+    properties:
+      id:
+        type: string
+      create_at:
+        type: integer
+      update_at:
+        type: integer
+      delete_at:
+        type: integer
+      type:
+        type: string
+      display_name:
+        type: string
+      name:
+        type: string
+      last_post_at:
+        type: integer
+      total_msg_count:
+        type: integer
+      extra_update_at:
+        type: integer
+      creator_id:
+        type: string
+  ChannelStats:
+    type: object
+    properties:
+      channel_id:
+        type: string
+      member_count:
+        type: integer
+  SmsVerify:
+    type: object
+    properties:
+      status:
+        type: string
+  Message:
+    type: object
+    properties:
+      id:
+        type: string
+      create_at:
+        type: integer
+      update_at:
+        type: integer
+      delete_at:
+        type: integer
+      user_id:
+        type: string
+      channel_id:
+        type: string
+      original_id:
+        type: string
+      local_id:
+        type: string
+      message:
+        type: string
+      type:
+        type: string
+      props:
+        type: object
+
+      file_ids:
+        type: array
+        items:
+          type: string
+  MessageList:
+    type: object
+    properties:
+      order:
+        type: array
+        items:
+            type: string
+        example: ["message_id1", "message_id12"]
+      messages:
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/Message'
+  MessageUnread:
+    type: object
+    properties:
+      channel_id:
+        type: string
+      msg_count:
+        type: integer
+  AppError:
+    type: object
+    properties:
+      status_code:
+        type: integer
+      id:
+        type: string
+      message:
+        type: string
+      request_id:
+        type: string
+  Status:
+    type: object
+    properties:
+      user_id:
+        type: string
+      status:
+        type: string
+      manual:
+        type: boolean
+      last_activity_at:
+        type: integer
+      active_channel:
+        type: string
+  StatusOK:
+    type: object
+    properties:
+      status:
+        description: Будет содержать «ok», если запрос был успешным
+        type: string
+  ChannelMember:
+    type: object
+    properties:
+      channel_id:
+        type: string
+      user_id:
+        type: string
+      roles:
+        type: string
+      last_viewed_at:
+        type: integer
+      msg_count:
+        type: integer
+      last_update_at:
+        type: integer
+  ChannelUnread:
+    type: object
+    properties:
+
+      channel_id:
+        type: string
+      msg_count:
+        type: integer
+  Token:
+    type: object
+    properties:
+      token:
+        type: string
+  ChannelData:
+    type: object
+    properties:
+      channel:
+        $ref: '#/definitions/Channel'
+      member:
+        $ref: '#/definitions/ChannelMember'
+  FileInfo:
+    type: object
+    properties:
+      id:
+        description: Идентификатор
+        type: string
+      local_id:
+        description: Локальный идентификатор
+        type: string
+      user_id:
+        description: Ид пользователя кто прикрепил файл
+        type: string
+      message_id:
+        description: Идентификатор сообщения
+        type: string
+      create_at:
+        type: integer
+      update_at:
+        type: integer
+      delete_at:
+        type: integer
+      name:
+        description: Название файла
+        type: string
+      extension:
+        description: Расширение
+        type: string
+      size:
+        description: Размер
+        type: integer
+      mime_type:
+        description: MIME
+        type: string
+      width:
+        description: Ширина (для изображений)
+        type: integer
+      height:
+        description: Высота (для изображений)
+        type: integer
+  PhoneReg:
+    type: object
+    properties:
+      email:
+        type: string
+      nickname:
+        type: string
+      phone:
+        type: string
+  RegToken:
+    type: object
+    properties:
+      stage_token:
+        type: string
+      status:
+        type: string
+  TokenCode:
+    type: object
+    properties:
+      token:
+        type: string
+      code:
+        type: string
+  UserReg:
+    type: object
+    properties:
+      id:
+        type: string
+      token:
+        type: string
+      user_id:
+        type: string
+      channel_id:
+        type: string
+      channel_name:
+        type: string
+      description:
+        type: string
+      is_active:
+        type: boolean
+  GetToken:
+    type: object
+    properties:
+      id:
+        type: string
+      user_id:
+        type: string
+      description:
+        type: string
+      is_active:
+        type: boolean
+
+externalDocs:
+
