@@ -10,8 +10,8 @@ info:
   x-logo:
     url: ""
     backgroundColor: "#FFFFFF"
-basePath: /api/v1
-host: demo.com
+basePath: /api/v4
+host: localhost
 tags:
   - name: errors
     description: |
