@@ -987,7 +987,9 @@ definitions:
         type: string
       Description:
         type: string
-      Cost:
+      Price:
+        type: string
+      Value:
         type: string
       DiscountLimit:
         type: integer
