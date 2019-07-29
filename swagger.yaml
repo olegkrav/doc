@@ -961,11 +961,12 @@ definitions:
         type: integer
       DeletedAt:
         type: integer
+      CntChild:
+        type: integer
       Child:
         type: array
         items:
           $ref: '#/definitions/Category'
-        nullable: true
   Categories:
     type: array
     items:
@@ -1005,10 +1006,23 @@ definitions:
         type: int
       CategoryId:
         type: int
+      Category:
+        $ref: '#/definitions/Category'
+      Media:
+        type: array
+        items:
+          $ref: '#/definitions/Media'
   Products:
     type: array
     items:
       $ref: '#/definitions/Product'
+  Media:
+    type: object
+    properties:
+      Id:
+        type: integer
+      FileId:
+        type: string
 
 externalDocs:
 
