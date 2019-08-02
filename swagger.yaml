@@ -732,6 +732,31 @@ paths:
         '403':
           $ref: '#/responses/Forbidden'
 
+  '/products/{product_id}/publish':
+    get:
+      tags:
+        - products
+      summary: Опубликовать товар
+      description: |
+        Публикация товара
+      parameters:
+        - in: query
+          name: "{product_id}"
+          type: integer
+          description: ид товара
+          required: true
+      responses:
+        '200':
+          description: Возвращает информацию о товаре
+          schema:
+            $ref: "#/definitions/Promos"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+
   '/files/promos/{promo_id}':
     post:
       tags:
