@@ -519,37 +519,31 @@ paths:
           $ref: '#/responses/NotImplemented'
 
   '/category':
-      get:
-        tags:
-          - category
-        summary: Возвращает список категорий
-        description: |
-          Возвращет список всех категорий без учета организации. Использование этого метода не рекомендуется. Используйте `/category/client/{client_id}`.
-        responses:
-          '200':
-            description: Возвращает список категорий
-            schema:
-              $ref: "#/definitions/Categories"
-          '400':
-            $ref: '#/responses/BadRequest'
-          '401':
-            $ref: '#/responses/Unauthorized'
-          '403':
-            $ref: '#/responses/Forbidden'
       post:
         tags:
           - category
         summary: Создание категории
-        description: ''
+        description: |
         parameters:
-            - in: body
-              name: post
-              description: json
-              required: true
-              schema:
-                type: object
-                required:
-                  - category
+          - in: body
+            name: post
+            description: json
+            schema:
+              type: object
+              required:
+                - ClientId
+                - Name
+              properties:
+                ClientId:
+                  type: integer
+                  description: ид организации
+                Name:
+                  type: string
+                  description: наименование категории
+                ParentId:
+                  type: integer
+                  description: ид родительской категории
+
 
   '/category/client/{client_id}':
     get:
@@ -558,11 +552,16 @@ paths:
       summary: Возвращает список категорий у организации
       description: ''
       parameters:
-        - name: client_id
+        - name: "{client_id}"
           in: query
           description: идентификатор организации
           required: true
           type: integer
+        - in: query
+          name: sort
+          description: сортировка по указанной колонке
+          type: string
+          default: "id"
       responses:
         '200':
           description: Возвращает список категорий у организации
@@ -582,7 +581,7 @@ paths:
       summary: Возвращает информацию о категории
       description: ''
       parameters:
-        - name: category_id
+        - name: "{category_id}"
           in: query
           description: идентификатор категории
           required: true
@@ -604,7 +603,7 @@ paths:
       summary: Удаление категории
       description: ''
       parameters:
-        - name: category_id
+        - name: "{category_id}"
           in: query
           description: идентификатор категории
           required: true
@@ -779,38 +778,86 @@ paths:
           $ref: '#/responses/NotImplemented'
 
   '/products':
-    get:
+    post:
       tags:
         - products
-      summary: Возвращает список всех продуктов/товаров
+      summary: Создание продукции/товара
       description: |
-        Возвращет список всех товаров без учета организации. Использование этого метода не рекомендуется. Используйте `/products/client/{client_id}`.
+      parameters:
+        - in: query
+          name: "{product_id}"
+          type: integer
+          description: ид продукции
+          required: true
+        - in: body
+          name: post
+          description: json
+          schema:
+            type: object
+            required:
+              - ClientId
+              - Name
+              - Preview
+              - Description
+              - CategoryId
+            properties:
+              ClientId:
+                type: int
+                description: ид организации
+              Name:
+                type: string
+                description: наименование товара/продукции
+              Description:
+                type: string
+                description: описание товара
+              CategoryId:
+                type: integer
+                description: ид категории
+
+  '/files/products/{product_id}':
+    post:
+      tags:
+        - products
+      summary: Загрузка медиафайлов продукции/товаров
+      description: |
+      consumes: ["multipart/form-data"]
+      parameters:
+        - in: query
+          name: "{product_id}"
+          type: integer
+          description: ид продукции
+          required: true
+        - in: formData
+          name: files
+          description: Данные файлов
+          required: true
+          type: file
       responses:
         '200':
-          description: Возвращает список товаров
+          description: Возврашает информацию о загруженном файле
           schema:
-            $ref: "#/definitions/Products"
+            type: object
+            properties:
+              file_infos:
+                description:
+                type: array
+                items:
+                  $ref: '#/definitions/FileInfo'
+              local_ids:
+                description:
+                type: array
+                items:
+                  type: string
         '400':
           $ref: '#/responses/BadRequest'
         '401':
           $ref: '#/responses/Unauthorized'
         '403':
           $ref: '#/responses/Forbidden'
-    post:
-      tags:
-        - products
-      summary: Создание продукции/товара
-      description: ''
-      parameters:
-        - in: body
-          name: post
-          description: json
-          required: true
-          schema:
-            type: object
-            required:
-              - products
-
+        '413':
+          $ref: '#/responses/TooLarge'
+        '501':
+          $ref: '#/responses/NotImplemented'
   '/products/client/{client_id}':
     get:
       tags:
@@ -818,10 +865,24 @@ paths:
       summary: Возвращает список продуктов/товаров у организации
       description: ''
       parameters:
-        - name: client_id
-          in: query
+        - in: query
+          name: "{client_id}"
           description: идентификатор организации
           required: true
+          type: integer
+        - name: page
+          in: query
+          description: Порядковый номер страницы
+          default: 0
+          type: string
+        - name: per_page
+          in: query
+          description: Количество записей на странице
+          default: 60
+          type: string
+        - name: category_id
+          in: query
+          description: идентификатор категории
           type: integer
       responses:
         '200':
@@ -834,7 +895,6 @@ paths:
           $ref: '#/responses/Unauthorized'
         '403':
           $ref: '#/responses/Forbidden'
-
   '/products/{product_id}':
     get:
       tags:
@@ -842,7 +902,7 @@ paths:
       summary: Возвращает информацию о продукции/товаре
       description: ''
       parameters:
-        - name: product_id
+        - name: "{product_id}"
           in: query
           description: идентификатор продукции/товара
           required: true
@@ -864,12 +924,11 @@ paths:
       summary: Удаление продукции/товара
       description: ''
       parameters:
-        - name: product_id
+        - name: "{product_id}"
           in: query
           description: идентификатор продукции/товара
           required: true
           type: integer
-
 definitions:
   Channel:
     type: object
@@ -1117,23 +1176,32 @@ definitions:
     properties:
       Id:
         type: integer
+        description: ид категории
       ClientId:
         type: integer
+        description: ид организации
       Name:
         type: string
+        description: наименование категории
       ParentId:
         type: integer
+        description: родетельская категория
         nullable: true
       CreatedAt:
         type: integer
+        description: дата создания
       UpdatedAt:
         type: integer
+        description: дата обновления
       DeletedAt:
         type: integer
+        description: дата удаления
       CntChild:
         type: integer
+        description: кол-во потомков
       Child:
         type: array
+        description: потомки
         items:
           $ref: '#/definitions/Category'
   Categories:
@@ -1149,32 +1217,46 @@ definitions:
     properties:
       Id:
         type: integer
+        description: идентификатор продукции
       ClientId:
         type: integer
+        description: идентификатор организации
       Name:
         type: string
+        description: наименование товара
       Preview:
         type: string
+        description: превью-описание товара
       Description:
         type: string
+        description: полное описание товара
       Price:
         type: string
+        description: цена
       Value:
         type: string
+        description: кол-во гр./шт. ?
       DiscountLimit:
         type: integer
+        description: ограничение по скидке
       Cashback:
         type: integer
+        description: кэшбэк
       Status:
         type: boolean
+        description: статус (на модерации/опубликовано)
       CreatedAt:
         type: int
+        description: дата создания
       UpdatedAt:
         type: int
+        description: дата обновления
       DeletedAt:
         type: int
+        description: дата удаления
       CategoryId:
         type: int
+        description: идентификатор категории
       Category:
         $ref: '#/definitions/Category'
       Media:
@@ -1197,20 +1279,28 @@ definitions:
     properties:
       Id:
         type: integer
+        description: ид акции/товара
       ClientId:
         type: integer
+        description: ид организации
       Name:
         type: string
+        description: наименование акции/товара
       Preview:
         type: string
+        description: превью
       Description:
         type: string
+        description: полное описание
       ProductId:
         type: int
+        description: ид продукции
       Push:
         type: boolean
+        description: пуш уведомление
       Status:
         type: boolean
+        description: статус
       Media:
         type: array
         items:
