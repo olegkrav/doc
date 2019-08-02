@@ -110,6 +110,7 @@ x-tagGroups:
       - files
       - category
       - products
+      - promos
 schemes:
   - http
   - https
@@ -609,6 +610,174 @@ paths:
           required: true
           type: integer
 
+  '/promos/client/{client_id}':
+    get:
+      tags:
+        - promos
+      summary: Список акций/новостей
+      description: |
+        Возвращает список всех акций/новостей у клиента
+      parameters:
+        - in: query
+          name: "{client_id}"
+          type: integer
+          description: ид клиента
+          required: true
+        - name: page
+          in: query
+          description: Порядковый номер страницы
+          default: 0
+          type: string
+        - name: per_page
+          in: query
+          description: Количество записей на странице
+          default: 60
+          type: string
+      responses:
+        '200':
+          description: Возвращает список акций/новостей
+          schema:
+            $ref: "#/definitions/Promos"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+    post:
+      tags:
+        - promos
+      summary: Создание акции/новости
+      description: |
+      parameters:
+        - in: query
+          name: "{client_id}"
+          description: ид клиента
+          type: integer
+          required: true
+        - in: body
+          name: post
+          description: json
+          schema:
+            $ref: "#/definitions/PromosCreate"
+      responses:
+        '200':
+          description: Возвращает информацию о акции/новости
+          schema:
+            $ref: "#/definitions/Promos"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+
+  '/promos/{promo_id}':
+    get:
+      tags:
+        - promos
+      summary: Информация о акции/новости
+      description: |
+        Возвращает информацию о акции/новости по id
+      parameters:
+        - in: query
+          name: "{promo_id}"
+          type: integer
+          description: ид акции/новости
+          required: true
+      responses:
+        '200':
+          description: Возвращает информацию о акции/новости
+          schema:
+            $ref: "#/definitions/Promos"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+    delete:
+      tags:
+        - promos
+      summary: Удаление акции/новости
+      description: |
+      parameters:
+        - in: query
+          name: "{promo_id}"
+          type: integer
+          description: ид акции/новости
+          required: true
+
+  '/promos/{promo_id}/publish':
+    get:
+      tags:
+        - promos
+      summary: Опубликовать акцию/новость
+      description: |
+        Публикация акции/новости
+      parameters:
+        - in: query
+          name: "{promo_id}"
+          type: integer
+          description: ид акции/новости
+          required: true
+      responses:
+        '200':
+          description: Возвращает информацию о акции/новости
+          schema:
+            $ref: "#/definitions/Promos"
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+
+  '/files/promos/{promo_id}':
+    post:
+      tags:
+        - promos
+      summary: Загрузка медиафайлов акции/новости
+      description: |
+      consumes: ["multipart/form-data"]
+      parameters:
+        - in: query
+          name: "{promo_id}"
+          type: integer
+          description: ид акции/новости
+          required: true
+        - in: formData
+          name: files
+          description: Данные файлов
+          required: true
+          type: file
+      responses:
+        '200':
+          description: Возврашает информацию о загруженном файле
+          schema:
+            type: object
+            properties:
+              file_infos:
+                description:
+                type: array
+                items:
+                  $ref: '#/definitions/FileInfo'
+              local_ids:
+                description:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/responses/BadRequest'
+        '401':
+          $ref: '#/responses/Unauthorized'
+        '403':
+          $ref: '#/responses/Forbidden'
+        '413':
+          $ref: '#/responses/TooLarge'
+        '501':
+          $ref: '#/responses/NotImplemented'
+
   '/products':
     get:
       tags:
@@ -1023,6 +1192,53 @@ definitions:
         type: integer
       FileId:
         type: string
+  Promos:
+    type: object
+    properties:
+      Id:
+        type: integer
+      ClientId:
+        type: integer
+      Name:
+        type: string
+      Preview:
+        type: string
+      Description:
+        type: string
+      ProductId:
+        type: int
+      Push:
+        type: boolean
+      Status:
+        type: boolean
+      Media:
+        type: array
+        items:
+          $ref: '#/definitions/Media'
+  PromosCreate:
+    type: object
+    properties:
+      ClientId:
+        type: integer
+        description: ид клиента
+      Name:
+        type: string
+        description: заголовок акции/новости
+      Preview:
+        type: string
+        description: превью акции/новости
+      Description:
+        type: string
+        description: описание акции/новости
+      ProductId:
+        type: integer
+        description: ид продукции (необязательно)
+      Push:
+        type: boolean
+        description: пуш уведомление
+      Status:
+        type: boolean
+        description: статус (на модерации/опубликовано)
 
 externalDocs:
 
