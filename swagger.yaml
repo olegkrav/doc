@@ -226,7 +226,7 @@ paths:
           type: string
       responses:
         '200':
-          description: Успешно
+          description: Успешно 
   '/users/reg':
     post:
       tags:
