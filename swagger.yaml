@@ -111,6 +111,7 @@ x-tagGroups:
       - category
       - products
       - promos
+      - addresses
 schemes:
   - http
   - https
@@ -148,6 +149,84 @@ responses:
     schema:
       $ref: '#/definitions/AppError'
 paths:
+  '/users/{user_id}/addresses':
+    get:
+      tags:
+        - addresses
+      summary:
+      description: Получение списка адресов доставки пользователя
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/UserAddressList'
+    post:
+      tags:
+        - addresses
+      summary:
+      description: Создание нового адреса доставки пользователя
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+        - in: body
+          schema:
+            $ref: '#/definitions/AddressRequest'
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/AddressCreateResponse'
+
+  '/users/{user_id}/addresses/{addr_id}':
+    get:
+      tags:
+        - addresses
+      summary:
+      description: Получение информации о адресе
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+        - in: path
+          name: "{addr_id}"
+          description: ид адреса
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/AddressRequest'
+    delete:
+      tags:
+        - addresses
+      summary:
+      description: Удаление адреса доставки
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+        - in: path
+          name: "{addr_id}"
+          description: ид адреса
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
   '/users/reg':
     post:
       tags:
@@ -1354,6 +1433,58 @@ definitions:
       Status:
         type: boolean
         description: статус (на модерации/опубликовано)
+  AddressRequest:
+    type: object
+    properties:
+      City:
+        type: string
+        description: город
+      Street:
+        type: string
+        description: улица
+      House:
+        type: integer
+        description: номер дома
+      Entrance:
+        type: integer
+        description: номер подъезда
+      Apartment:
+        type: integer
+        description: номер квартиры
+      Floor:
+        type: integer
+        description: номер этажа
+      Comment:
+        type: string
+        description: дополнительный комментарий
+  UserAddress:
+    type: object
+    properties:
+      Id:
+        type: string
+        description: ид адреса
+      UserId:
+        type: string
+        description: ид пользователя
+  UserAddressResponse:
+    type: object
+    properties:
+      Id:
+        type: string
+        description: ид адреса
+      Name:
+        type: string
+        description: адрес пользователя
+  UserAddressList:
+    type: array
+    items:
+      $ref: '#/definitions/UserAddressResponse'
+  AddressCreateResponse:
+    type: object
+    properties:
+      ID:
+        type: string
+        description: ИД адреса
 
 externalDocs:
 
