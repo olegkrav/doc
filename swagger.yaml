@@ -249,6 +249,30 @@ paths:
             $ref: '#/definitions/AddressCreateResponse'
 
   '/users/{user_id}/addresses/{addr_id}':
+    post:
+      tags:
+        - addresses
+      summary:
+      description: Обновление информации о адресе
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+        - in: path
+          name: "{addr_id}"
+          description: ид адреса
+          required: true
+          type: string
+        - in: body
+          schema:
+            $ref: '#/definitions/AddressRequest'
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/AddressRequest'
     get:
       tags:
         - addresses
