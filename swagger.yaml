@@ -164,6 +164,11 @@ paths:
           description: ид пользователя
           required: true
           type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/CheckoutOrderResponse'
   '/order/{order_id}':
     get:
       tags:
@@ -1669,6 +1674,17 @@ definitions:
     properties:
       Id:
         type: int
+  CheckoutOrderResponse:
+    type: object
+    properties:
+      OrderId:
+        type: string
+      FormUrl:
+        type: string
+      ErrorCode:
+        type: string
+      ErrorMessage:
+        type: string
 
 externalDocs:
 
