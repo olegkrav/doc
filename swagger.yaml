@@ -115,9 +115,9 @@ x-tagGroups:
       - promos
       - addresses
       - cart
+      - order
 schemes:
   - http
-  - https
 consumes:
   - application/json
 produces:
@@ -152,6 +152,37 @@ responses:
     schema:
       $ref: '#/definitions/AppError'
 paths:
+  '/order/{user_id}':
+    post:
+      tags:
+        - order
+      summary:
+      description: сформировать заказ
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/CheckoutOrderResponse'
+  '/order/{order_id}':
+    get:
+      tags:
+        - order
+      summary:
+      description: просмотр заказа
+      parameters:
+        - in: path
+          name: "{order_id}"
+          description: ид заказа
+          required: true
+          type: int
+
+
   '/cart/{user_id}':
     get:
       tags:
@@ -1608,7 +1639,52 @@ definitions:
       TotalPrice:
         type: integer
         description: цена товаров в корзине
-
+  Client:
+    type: object
+    properties:
+      id:
+        type: int
+        description: ид
+      name:
+        type: string
+        description: наименование клиента
+      phone:
+        type: string
+        description: телефон
+      details:
+        type: string
+        description: реквизиты
+      notice:
+        type: string
+        description: примечание
+      status:
+        type: int
+        description: 1
+      date_in:
+        type: int
+        description: 1
+      date_out:
+        type: int
+        description: 1
+      discount_limit:
+        type: int
+        description: 1
+  Office:
+    type: object
+    properties:
+      Id:
+        type: int
+  CheckoutOrderResponse:
+    type: object
+    properties:
+      OrderId:
+        type: string
+      FormUrl:
+        type: string
+      ErrorCode:
+        type: string
+      ErrorMessage:
+        type: string
 
 externalDocs:
 
