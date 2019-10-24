@@ -169,6 +169,7 @@ paths:
           description: Успешно
           schema:
             $ref: '#/definitions/CheckoutOrderResponse'
+
   '/order/{order_id}':
     get:
       tags:
@@ -182,6 +183,29 @@ paths:
           required: true
           type: int
 
+  '/order/{user_id}/history':
+    get:
+      tags:
+        - order
+      summary:
+      description: получить историю заказов пользователя
+      parameters:
+        - in: path
+          name: "{user_id}"
+          description: ид пользователя
+          required: true
+          type: string
+        - in: query
+          name: page
+          description: номер страницы
+        - in: query
+          name: per_page
+          description: количество элементов на странице
+      responses:
+        '200':
+          description: Успешно
+          schema:
+            $ref: '#/definitions/OrderHistory'
 
   '/cart/{user_id}':
     get:
@@ -1685,6 +1709,50 @@ definitions:
         type: string
       ErrorMessage:
         type: string
+  OrderHistory:
+    type: object
+    properties:
+      id:
+        type: int
+        description: ид
+      status:
+        type: string
+        description: статус заказа
+      value:
+        type: int
+        description: общая сумма заказа
+      created_at:
+        type: int
+        description: дата создания
+      positions:
+        type: array
+        description: позиции
+        items:
+          $ref: '#/definitions/Position'
+  Position:
+    type: object
+    properties:
+      id:
+        type: string
+        description: ид
+      name:
+        type: string
+        description: наименование позиции
+      price:
+        type: int
+        description: цена на момент оформления
+      quantity:
+        type: int
+        description: количество
+      user_id:
+        type: string
+        description: ид пользователя
+      product_id:
+        type: int
+        description: ид продукции в каталоге
+      order_id:
+        type: int
+        description: ид заказа
 
 externalDocs:
 
