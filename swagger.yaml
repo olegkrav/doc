@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   description: |
     ### Конструктор приложений
-  version: 0.0.3
+  version: 0.1.0
   title: ''
   termsOfService: ''
   contact:
@@ -89,33 +89,52 @@ tags:
       }
       ```
   - name: auth
-    description: Авторизация.
-  - name: channels
-    description: Беседы.
+    description: |
+      #### Авторизация.
   - name: messages
-    description: Сообщения
+    description: |
+      #### Сообщения.
   - name: files
-    description: Работа с файлами.
+    description: |
+      #### Работа с файлами.
   - name: category
-    description: Категории
+    description: |
+      #### Категории.
   - name: cart
-    description: Корзина
+    description: |
+      #### Корзина.
+  - name: products
+    description: |
+      #### Товары.
+  - name: promos
+    description: |
+      #### Акции.
+  - name: order
+    description: |
+      #### Заказы.
+  - name: bonus
+    description: |
+      #### Бонусы.
 x-tagGroups:
   - name: Базовые определения
     tags:
       - errors
       - websocket
-  - name: Endpoints
+  - name: Авторизация и чат
     tags:
       - auth
       - messages
       - files
+  - name: Каталог
+    tags:
       - category
       - products
       - promos
-      - addresses
+  - name: Заказ
+    tags:
       - cart
       - order
+      - bonus
 schemes:
   - http
 consumes:
@@ -124,31 +143,31 @@ produces:
   - application/json
 responses:
   'Forbidden':
-    description: Do not have appropriate permissions
+    description: Доступ запрещён
     schema:
       $ref: '#/definitions/AppError'
   'Unauthorized':
-    description: No access token provided
+    description: Access-Token не предоставлен
     schema:
       $ref: '#/definitions/AppError'
   'BadRequest':
-    description: Invalid or missing parameters in URL or request body
+    description: Недопустимые или отсутствующие параметры в URL-адресе или теле запроса
     schema:
       $ref: '#/definitions/AppError'
   'NotFound':
-    description: Resource not found
+    description: Страница не найдена
     schema:
       $ref: '#/definitions/AppError'
   'TooLarge':
-    description: Content too large
+    description: Содержание слишком большое
     schema:
       $ref: '#/definitions/AppError'
   'NotImplemented':
-    description: Feature is disabled
+    description: Функция отключена
     schema:
       $ref: '#/definitions/AppError'
   'InternalServerError':
-    description: Something went wrong with the server
+    description: Что-то пошло не так с сервером
     schema:
       $ref: '#/definitions/AppError'
 paths:
@@ -156,14 +175,20 @@ paths:
     post:
       tags:
         - order
-      summary:
-      description: сформировать заказ
+      summary: Формирование заказа
+      description: |
+        ####
+        ```
+        ```
       parameters:
         - in: path
           name: "{user_id}"
           description: ид пользователя
           required: true
           type: string
+        - in: body
+          schema:
+            $ref: '#/definitions/OrderBody'
       responses:
         '200':
           description: Успешно
@@ -174,8 +199,11 @@ paths:
     get:
       tags:
         - order
-      summary:
-      description: просмотр заказа
+      summary: Просмотр заказа
+      description: |
+        ####
+        ```
+        ```
       parameters:
         - in: path
           name: "{order_id}"
@@ -187,8 +215,11 @@ paths:
     get:
       tags:
         - order
-      summary:
-      description: получить историю заказов пользователя
+      summary: История заказов у пользователя
+      description: |
+        ####
+        ```
+        ```
       parameters:
         - in: path
           name: "{user_id}"
@@ -211,8 +242,11 @@ paths:
     get:
       tags:
         - cart
-      summary:
-      description: Получение корзины пользователя
+      summary: Просмотр корзины пользователя
+      description: |
+          ####
+          ```
+          ```
       parameters:
         - in: path
           name: "{user_id}"
@@ -228,8 +262,11 @@ paths:
     post:
       tags:
         - cart
-      summary:
-      description: Добавление товара в корзину
+      summary: Добавление товаров в корзину
+      description: |
+        ####
+        ```
+        ```
       parameters:
         - in: path
           name: "{product_id}"
@@ -246,128 +283,6 @@ paths:
           description: Успешно
           schema:
             $ref: '#/definitions/CreateCartItemResponse'
-  '/cart/item/{cart_item_id}':
-    put:
-      tags:
-        - cart
-      summary:
-      description: Изменение кол-ва товара в корзине
-      parameters:
-        - in: path
-          name: "{cart_item_id}"
-          description: ид товара в корзине
-          required: true
-          type: string
-        - in: body
-          schema:
-            $ref: '#/definitions/UpdateCartItemBody'
-      responses:
-        '200':
-          description: Успешно
-          schema:
-            $ref: '#/definitions/UpdateCartItemResponse'
-  '/users/{user_id}/addresses':
-    get:
-      tags:
-        - addresses
-      summary:
-      description: Получение списка адресов доставки пользователя
-      parameters:
-        - in: path
-          name: "{user_id}"
-          description: ид пользователя
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Успешно
-          schema:
-            $ref: '#/definitions/UserAddressList'
-    post:
-      tags:
-        - addresses
-      summary:
-      description: Создание нового адреса доставки пользователя
-      parameters:
-        - in: path
-          name: "{user_id}"
-          description: ид пользователя
-          required: true
-          type: string
-        - in: body
-          schema:
-            $ref: '#/definitions/AddressRequest'
-      responses:
-        '200':
-          description: Успешно
-          schema:
-            $ref: '#/definitions/AddressCreateResponse'
-
-  '/users/{user_id}/addresses/{addr_id}':
-    post:
-      tags:
-        - addresses
-      summary:
-      description: Обновление информации о адресе
-      parameters:
-        - in: path
-          name: "{user_id}"
-          description: ид пользователя
-          required: true
-          type: string
-        - in: path
-          name: "{addr_id}"
-          description: ид адреса
-          required: true
-          type: string
-        - in: body
-          schema:
-            $ref: '#/definitions/AddressRequest'
-      responses:
-        '200':
-          description: Успешно
-          schema:
-            $ref: '#/definitions/AddressRequest'
-    get:
-      tags:
-        - addresses
-      summary:
-      description: Получение информации о адресе
-      parameters:
-        - in: path
-          name: "{user_id}"
-          description: ид пользователя
-          required: true
-          type: string
-        - in: path
-          name: "{addr_id}"
-          description: ид адреса
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Успешно
-          schema:
-            $ref: '#/definitions/AddressRequest'
-    delete:
-      tags:
-        - addresses
-      summary:
-      description: Удаление адреса доставки
-      parameters:
-        - in: path
-          name: "{user_id}"
-          description: ид пользователя
-          required: true
-          type: string
-        - in: path
-          name: "{addr_id}"
-          description: ид адреса
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Успешно
   '/users/reg':
     post:
       tags:
@@ -1175,43 +1090,6 @@ paths:
           required: true
           type: integer
 definitions:
-  Channel:
-    type: object
-    properties:
-      id:
-        type: string
-      create_at:
-        type: integer
-      update_at:
-        type: integer
-      delete_at:
-        type: integer
-      type:
-        type: string
-      display_name:
-        type: string
-      name:
-        type: string
-      last_post_at:
-        type: integer
-      total_msg_count:
-        type: integer
-      extra_update_at:
-        type: integer
-      creator_id:
-        type: string
-  ChannelStats:
-    type: object
-    properties:
-      channel_id:
-        type: string
-      member_count:
-        type: integer
-  SmsVerify:
-    type: object
-    properties:
-      status:
-        type: string
   Message:
     type: object
     properties:
@@ -1254,13 +1132,6 @@ definitions:
         type: object
         additionalProperties:
           $ref: '#/definitions/Message'
-  MessageUnread:
-    type: object
-    properties:
-      channel_id:
-        type: string
-      msg_count:
-        type: integer
   AppError:
     type: object
     properties:
@@ -1272,60 +1143,12 @@ definitions:
         type: string
       request_id:
         type: string
-  Status:
-    type: object
-    properties:
-      user_id:
-        type: string
-      status:
-        type: string
-      manual:
-        type: boolean
-      last_activity_at:
-        type: integer
-      active_channel:
-        type: string
   StatusOK:
     type: object
     properties:
       status:
         description: Будет содержать «ok», если запрос был успешным
         type: string
-  ChannelMember:
-    type: object
-    properties:
-      channel_id:
-        type: string
-      user_id:
-        type: string
-      roles:
-        type: string
-      last_viewed_at:
-        type: integer
-      msg_count:
-        type: integer
-      last_update_at:
-        type: integer
-  ChannelUnread:
-    type: object
-    properties:
-
-      channel_id:
-        type: string
-      msg_count:
-        type: integer
-  Token:
-    type: object
-    properties:
-      token:
-        type: string
-  ChannelData:
-    type: object
-    properties:
-      channel:
-        $ref: '#/definitions/Channel'
-      member:
-        $ref: '#/definitions/ChannelMember'
   FileInfo:
     type: object
     properties:
@@ -1365,28 +1188,12 @@ definitions:
       height:
         description: Высота (для изображений)
         type: integer
-  PhoneReg:
-    type: object
-    properties:
-      email:
-        type: string
-      nickname:
-        type: string
-      phone:
-        type: string
   RegToken:
     type: object
     properties:
       stage_token:
         type: string
       status:
-        type: string
-  TokenCode:
-    type: object
-    properties:
-      token:
-        type: string
-      code:
         type: string
   UserReg:
     type: object
@@ -1416,6 +1223,7 @@ definitions:
         type: string
       is_active:
         type: boolean
+
   Category:
     type: object
     properties:
@@ -1457,6 +1265,7 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/Category'
+
   Product:
     type: object
     properties:
@@ -1512,6 +1321,7 @@ definitions:
     type: array
     items:
       $ref: '#/definitions/Product'
+
   Media:
     type: object
     properties:
@@ -1519,6 +1329,7 @@ definitions:
         type: integer
       FileId:
         type: string
+
   Promos:
     type: object
     properties:
@@ -1574,64 +1385,14 @@ definitions:
       Status:
         type: boolean
         description: статус (на модерации/опубликовано)
-  AddressRequest:
-    type: object
-    properties:
-      City:
-        type: string
-        description: город
-      Street:
-        type: string
-        description: улица
-      House:
-        type: integer
-        description: номер дома
-      Entrance:
-        type: integer
-        description: номер подъезда
-      Apartment:
-        type: integer
-        description: номер квартиры
-      Floor:
-        type: integer
-        description: номер этажа
-      Comment:
-        type: string
-        description: дополнительный комментарий
-  UserAddress:
-    type: object
-    properties:
-      Id:
-        type: string
-        description: ид адреса
-      UserId:
-        type: string
-        description: ид пользователя
-  UserAddressResponse:
-    type: object
-    properties:
-      Id:
-        type: string
-        description: ид адреса
-      Name:
-        type: string
-        description: адрес пользователя
-  UserAddressList:
-    type: array
-    items:
-      $ref: '#/definitions/UserAddressResponse'
-  AddressCreateResponse:
-    type: object
-    properties:
-      ID:
-        type: string
-        description: ИД адреса
+
   UpdateCartItemBody:
     type: object
     properties:
       Quantity:
         type: integer
         description: кол-во товара
+
   UpdateCartItemResponse:
     type: object
     properties:
@@ -1647,6 +1408,7 @@ definitions:
       Id:
         type: string
         description: ид товара в корзине
+
   Cart:
     type: object
     properties:
@@ -1753,6 +1515,27 @@ definitions:
       order_id:
         type: int
         description: ид заказа
+  OrderBody:
+    type: object
+    properties:
+      address:
+        type: string
+        description: адрес доставки
+      phone:
+        type: string
+        description: контактный номер телефона
+      comment:
+        type: string
+        description: комментарий к заказу
+      bonus:
+        type: int
+        description: количество оплаты бонусами
+      delivery_type:
+        type: string
+        description: тип доставки
+      delivery_date:
+        type: int
+        description: дата доставки в unix формате
 
 externalDocs:
 
