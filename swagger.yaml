@@ -258,31 +258,23 @@ paths:
           description: Успешно
           schema:
             $ref: '#/definitions/Cart'
-  '/products/{product_id}/cart/{user_id}':
     post:
       tags:
         - cart
       summary: Добавление товаров в корзину
       description: |
-        ####
-        ```
-        ```
+          ####
+          ```
+          ```
       parameters:
-        - in: path
-          name: "{product_id}"
-          description: ид товара
-          required: true
-          type: integer
         - in: path
           name: "{user_id}"
           description: ид пользователя
           required: true
           type: string
-      responses:
-        '200':
-          description: Успешно
+        - in: body
           schema:
-            $ref: '#/definitions/CreateCartItemResponse'
+            $ref: '#/definitions/CartItems'
   '/users/reg':
     post:
       tags:
@@ -1425,6 +1417,17 @@ definitions:
       TotalPrice:
         type: integer
         description: цена товаров в корзине
+  CartItem:
+    type: object
+    properties:
+      product_id:
+        type: string
+      quantity:
+        type: int
+  CartItems:
+    type: array
+    items:
+      $ref: '#/definitions/CartItem'
   Client:
     type: object
     properties:
