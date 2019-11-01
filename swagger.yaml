@@ -97,7 +97,7 @@ tags:
   - name: files
     description: |
       #### Работа с файлами.
-  - name: category
+  - name: categories
     description: |
       #### Категории.
   - name: cart
@@ -127,7 +127,7 @@ x-tagGroups:
       - files
   - name: Каталог
     tags:
-      - category
+      - categories
       - products
       - promos
   - name: Заказ
@@ -645,96 +645,142 @@ paths:
         '501':
           $ref: '#/responses/NotImplemented'
 
-  '/category':
+##################################################################################################################
+
+
+
+
+  '/categories':
+      get:
+        tags:
+          - categories
+        summary: Список категорий
+        description: |
+            ###
+        parameters:
+          - in: query
+            name: client_id
+            type: string
+            description: ид организации
+        responses:
+          200:
+            description: Возвращает список категорий
+            schema:
+              $ref: '#/definitions/Categories'
+          400:
+            $ref: '#/responses/BadRequest'
+          401:
+            $ref: '#/responses/Unauthorized'
+          403:
+            $ref: '#/responses/Forbidden'
+          404:
+            $ref: '#/responses/NotFound'
+          501:
+            $ref: '#/responses/NotImplemented'
       post:
         tags:
-          - category
+          - categories
         summary: Создание категории
         description: |
+            ###
         parameters:
           - in: body
             name: post
             description: json
             schema:
-              type: object
-              required:
-                - ClientId
-                - Name
-              properties:
-                ClientId:
-                  type: integer
-                  description: ид организации
-                Name:
-                  type: string
-                  description: наименование категории
-                ParentId:
-                  type: integer
-                  description: ид родительской категории
-
-
-  '/category/client/{client_id}':
+              $ref: '#/definitions/Category'
+        responses:
+          200:
+            description: Возвращает информацию о созданной категории
+            schema:
+              $ref: '#/definitions/Category'
+          400:
+            $ref: '#/responses/BadRequest'
+          401:
+            $ref: '#/responses/Unauthorized'
+          403:
+            $ref: '#/responses/Forbidden'
+          404:
+            $ref: '#/responses/NotFound'
+          501:
+            $ref: '#/responses/NotImplemented'
+  '/categories/{category_id}/path':
     get:
       tags:
-        - category
-      summary: Возвращает список категорий у организации
-      description: ''
+        - categories
+      summary: Информация о категории и его потомках
+      description: |
+          ###
       parameters:
-        - name: "{client_id}"
-          in: query
+        - in: path
+          name: "{category_id}"
+          type: integer
           description: идентификатор организации
           required: true
-          type: integer
-        - in: query
-          name: sort
-          description: сортировка по указанной колонке
-          type: string
-          default: "id"
       responses:
-        '200':
-          description: Возвращает список категорий у организации
-          schema:
-            $ref: "#/definitions/CategoriesByClient"
-        '400':
-          $ref: '#/responses/BadRequest'
-        '401':
-          $ref: '#/responses/Unauthorized'
-        '403':
-          $ref: '#/responses/Forbidden'
-
-  '/category/{category_id}':
-    get:
-      tags:
-        - category
-      summary: Возвращает информацию о категории
-      description: ''
-      parameters:
-        - name: "{category_id}"
-          in: query
-          description: идентификатор категории
-          required: true
-          type: integer
-      responses:
-        '200':
-          description: Возвращает информацию о категории
+        200:
+          description: Успешно
           schema:
             $ref: "#/definitions/Category"
-        '400':
+        400:
           $ref: '#/responses/BadRequest'
-        '401':
+        401:
           $ref: '#/responses/Unauthorized'
-        '403':
+        403:
           $ref: '#/responses/Forbidden'
-    delete:
+        501:
+          $ref: '#/responses/NotImplemented'
+  '/categories/{category_id}':
+    get:
       tags:
-        - category
-      summary: Удаление категории
-      description: ''
+        - categories
+      summary: Информация о категории
+      description: |
+          ###
       parameters:
-        - name: "{category_id}"
-          in: query
+        - in: path
+          name: "{category_id}"
+          type: integer
           description: идентификатор категории
           required: true
+      responses:
+        200:
+          description: Успешно
+          schema:
+            $ref: "#/definitions/Category"
+        400:
+          $ref: '#/responses/BadRequest'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        501:
+          $ref: '#/responses/NotImplemented'
+    delete:
+      tags:
+        - categories
+      summary: Удаление категории
+      description: |
+          ###
+      parameters:
+        - in: path
+          name: "{category_id}"
+          required: true
+          description: идентификатор категории
           type: integer
+      responses:
+        200:
+          description: Успешно
+          schema:
+            $ref: "#/definitions/StatusOK"
+        400:
+          $ref: '#/responses/BadRequest'
+        401:
+          $ref: '#/responses/Unauthorized'
+        403:
+          $ref: '#/responses/Forbidden'
+        501:
+          $ref: '#/responses/NotImplemented'
 
   '/promos/client/{client_id}':
     get:
@@ -1216,39 +1262,143 @@ definitions:
       is_active:
         type: boolean
 
+  ProductList:
+    type: object
+    properties:
+      order:
+        type: array
+        items:
+          type: string
+      products:
+        type: array
+        items:
+          $ref: '#/definitions/Product'
   Category:
     type: object
     properties:
-      Id:
-        type: integer
+      id:
+        type: string
         description: ид категории
-      ClientId:
-        type: integer
+      client_id:
+        type: string
         description: ид организации
-      Name:
+      name:
         type: string
         description: наименование категории
-      ParentId:
+      parent_id:
         type: integer
         description: родетельская категория
         nullable: true
-      CreatedAt:
+      create_at:
         type: integer
         description: дата создания
-      UpdatedAt:
+      update_at:
         type: integer
         description: дата обновления
-      DeletedAt:
+      lft:
         type: integer
-        description: дата удаления
-      CntChild:
+        description: left
+      rgt:
+        type: integer
+        description: right
+      count_children:
         type: integer
         description: кол-во потомков
-      Child:
+      children:
         type: array
         description: потомки
         items:
           $ref: '#/definitions/Category'
+      destination_id:
+        type: string
+        description: destination id
+      products:
+        $ref: '#/definitions/ProductList'
+  Product:
+    type: object
+    properties:
+      id:
+        type: string
+        description: идентификатор продукции
+      client_id:
+        type: string
+        description: идентификатор организации
+      name:
+        type: string
+        description: наименование товара
+      preview:
+        type: string
+        description: превью-описание товара
+      description:
+        type: string
+        description: полное описание товара
+      price:
+        type: string
+        description: цена
+      value:
+        type: string
+        description: value
+      discount_limit:
+        type: string
+        description: ограничение по скидке
+      cashback:
+        type: integer
+        description: кэшбэк
+      status:
+        type: boolean
+        description: статус (на модерации/опубликовано)
+      create_at:
+        type: int
+        description: дата создания
+      update_at:
+        type: int
+        description: дата обновления
+      delete_at:
+        type: int
+        description: дата удаления
+      category_id:
+        type: string
+        description: идентификатор категории
+      file_ids:
+        type: array
+        items:
+          type: string
+      image:
+        type: object
+        schema:
+          $ref: '#/definitions/FileInfo'
+      more_image:
+        type: array
+        items:
+          $ref: '#/definitions/FileInfo'
+      category:
+        type: object
+        schema:
+          $ref: '#/definitions/Category'
+      matadata:
+        type: object
+        schema:
+          $ref: '#/definitions/ProductMetadata'
+  ProductMetadata:
+    type: object
+    properties:
+      files:
+        type: array
+        items:
+          $ref: '#/definitions/FileInfo'
+      images:
+        type: array
+        items:
+          $ref: '#/definitions/PostImage'
+  PostImage:
+    type: object
+    properties:
+      with:
+        type: integer
+        description: ширина
+      height:
+        type: integer
+        description: высота
   Categories:
     type: array
     items:
@@ -1258,7 +1408,7 @@ definitions:
     items:
       $ref: '#/definitions/Category'
 
-  Product:
+  ProductOld:
     type: object
     properties:
       Id:
