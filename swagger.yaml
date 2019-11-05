@@ -1067,7 +1067,7 @@ paths:
           name: "{category_id}"
           type: integer
           required: true
-          description: идентификатор организации
+          description: идентификатор категории
         - in: query
           name: page
           type: string
@@ -1081,7 +1081,7 @@ paths:
         - in: query
           name: client_id
           type: integer
-          description: ид организации
+          description: идентификатор организации
       responses:
         '200':
           description: Возвращает список продуктов/товаров у организации
