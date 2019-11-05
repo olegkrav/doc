@@ -782,7 +782,7 @@ paths:
         501:
           $ref: '#/responses/NotImplemented'
 
-  '/promos/client/{client_id}':
+  '/promos':
     get:
       tags:
         - promos
@@ -790,11 +790,6 @@ paths:
       description: |
         Возвращает список всех акций/новостей у клиента
       parameters:
-        - in: query
-          name: "{client_id}"
-          type: integer
-          description: ид клиента
-          required: true
         - name: page
           in: query
           description: Порядковый номер страницы
@@ -805,6 +800,11 @@ paths:
           description: Количество записей на странице
           default: 60
           type: string
+        - in: query
+          name: "{client_id}"
+          type: integer
+          description: ид клиента
+          required: true
       responses:
         '200':
           description: Возвращает список акций/новостей
@@ -831,7 +831,7 @@ paths:
           name: post
           description: json
           schema:
-            $ref: "#/definitions/PromosCreate"
+            $ref: "#/definitions/Promos"
       responses:
         '200':
           description: Возвращает информацию о акции/новости
@@ -913,7 +913,7 @@ paths:
       description: |
         Публикация товара
       parameters:
-        - in: query
+        - in: path
           name: "{product_id}"
           type: integer
           description: ид товара
@@ -922,7 +922,7 @@ paths:
         '200':
           description: Возвращает информацию о товаре
           schema:
-            $ref: "#/definitions/Promos"
+            $ref: "#/definitions/Product"
         '400':
           $ref: '#/responses/BadRequest'
         '401':
@@ -982,35 +982,11 @@ paths:
       summary: Создание продукции/товара
       description: |
       parameters:
-        - in: query
-          name: "{product_id}"
-          type: integer
-          description: ид продукции
-          required: true
         - in: body
           name: post
           description: json
           schema:
-            type: object
-            required:
-              - ClientId
-              - Name
-              - Preview
-              - Description
-              - CategoryId
-            properties:
-              ClientId:
-                type: int
-                description: ид организации
-              Name:
-                type: string
-                description: наименование товара/продукции
-              Description:
-                type: string
-                description: описание товара
-              CategoryId:
-                type: integer
-                description: ид категории
+            $ref: '#/definitions/Product'
 
   '/files/products/{product_id}':
     post:
@@ -1100,8 +1076,8 @@ paths:
       summary: Возвращает информацию о продукции/товаре
       description: ''
       parameters:
-        - name: "{product_id}"
-          in: query
+        - in: path
+          name: "{product_id}"
           description: идентификатор продукции/товара
           required: true
           type: integer
@@ -1475,34 +1451,31 @@ definitions:
   Promos:
     type: object
     properties:
-      Id:
+      id:
         type: integer
         description: ид акции/товара
-      ClientId:
+      client_id:
         type: integer
         description: ид организации
-      Name:
+      name:
         type: string
         description: наименование акции/товара
-      Preview:
+      preview:
         type: string
         description: превью
-      Description:
+      description:
         type: string
         description: полное описание
-      ProductId:
+      product_id:
         type: int
         description: ид продукции
-      Push:
-        type: boolean
-        description: пуш уведомление
-      Status:
+      active:
         type: boolean
         description: статус
-      Media:
+      media:
         type: array
         items:
-          $ref: '#/definitions/Media'
+          $ref: '#/definitions/FileInfo'
   PromosCreate:
     type: object
     properties:
