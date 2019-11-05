@@ -782,7 +782,7 @@ paths:
         501:
           $ref: '#/responses/NotImplemented'
 
-  '/promos/client/{client_id}':
+  '/promos':
     get:
       tags:
         - promos
@@ -790,11 +790,6 @@ paths:
       description: |
         Возвращает список всех акций/новостей у клиента
       parameters:
-        - in: query
-          name: "{client_id}"
-          type: integer
-          description: ид клиента
-          required: true
         - name: page
           in: query
           description: Порядковый номер страницы
@@ -805,6 +800,11 @@ paths:
           description: Количество записей на странице
           default: 60
           type: string
+        - in: query
+          name: "{client_id}"
+          type: integer
+          description: ид клиента
+          required: true
       responses:
         '200':
           description: Возвращает список акций/новостей
@@ -831,7 +831,7 @@ paths:
           name: post
           description: json
           schema:
-            $ref: "#/definitions/PromosCreate"
+            $ref: "#/definitions/Promos"
       responses:
         '200':
           description: Возвращает информацию о акции/новости
@@ -1451,34 +1451,31 @@ definitions:
   Promos:
     type: object
     properties:
-      Id:
+      id:
         type: integer
         description: ид акции/товара
-      ClientId:
+      client_id:
         type: integer
         description: ид организации
-      Name:
+      name:
         type: string
         description: наименование акции/товара
-      Preview:
+      preview:
         type: string
         description: превью
-      Description:
+      description:
         type: string
         description: полное описание
-      ProductId:
+      product_id:
         type: int
         description: ид продукции
-      Push:
-        type: boolean
-        description: пуш уведомление
-      Status:
+      active:
         type: boolean
         description: статус
-      Media:
+      media:
         type: array
         items:
-          $ref: '#/definitions/Media'
+          $ref: '#/definitions/FileInfo'
   PromosCreate:
     type: object
     properties:
